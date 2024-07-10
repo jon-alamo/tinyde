@@ -1,0 +1,44 @@
+body {
+    display: flex;
+    font-family: Arial, sans-serif;
+}
+
+#file-browser-container {
+    width: 25%;
+    border-right: 1px solid #ddd;
+    padding: 10px;
+}
+
+#file-browser {
+    max-height: 80vh;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 10px;
+}
+
+#file-browser div {
+    padding: 5px;
+    cursor: pointer;
+}
+
+#file-browser div.selected {
+    background-color: #ddd;
+}
+
+.parent-drop-area {
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #f8f8f8;
+    text-align: center;
+    border: 1px dashed #ccc;
+    cursor: pointer;
+}
+
+#editor-container {
+    width: 75%;
+    padding: 10px;
+}
+
+button {
+    margin: 5px;
+}
