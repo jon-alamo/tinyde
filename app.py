@@ -2,6 +2,7 @@ from flask import Flask, render_template, jsonify, request
 from flask_cors import CORS
 import os
 from file_operations import create_file, create_directory, delete_item, rename_item, move_item, save_file_content, get_file_content
+import jedi
 
 app = Flask(__name__)
 CORS(app)
@@ -57,6 +58,38 @@ def save_content():
     data = request.json
     save_file_content(data['path'], data['content'])
     return jsonify({"success": True})
+
+
+@app.route('/object-attributes', methods=['GET'])
+def get_object_attributes():
+    obj_name = request.args.get('object')
+    # This is a simplified example. In reality, you'd need a more sophisticated
+    # way to get object attributes, possibly using the `inspect` module or AST parsing.
+    attributes = []
+    try:
+        obj = eval(obj_name)
+        attributes = dir(obj)
+    except:
+        pass
+    return jsonify(attributes)
+
+
+@app.route('/autocomplete', methods=['POST'])
+def autocomplete():
+    data = request.json
+    source = data['source']
+    line = data['line']
+    column = data['column']
+
+    script = jedi.Script(source)
+    completions = script.complete(line, column)
+
+    return jsonify([{
+        'name': c.name,
+        'type': c.type,
+        'description': c.description,
+    } for c in completions])
+
 
 def get_file_structure(root_dir):
     file_structure = []

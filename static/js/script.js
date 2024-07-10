@@ -18,11 +18,78 @@ document.addEventListener('DOMContentLoaded', () => {
     fileBrowser.appendChild(parentDropArea);
     let currentDirectory = '.';
     let selectedFile = null;
+
+    // Add this near the top of your script.js file
+    const pythonBuiltins = [
+        'abs', 'all', 'any', 'ascii', 'bin', 'bool', 'bytearray', 'bytes', 'callable',
+        'chr', 'classmethod', 'compile', 'complex', 'delattr', 'dict', 'dir', 'divmod',
+        'enumerate', 'eval', 'exec', 'filter', 'float', 'format', 'frozenset', 'getattr',
+        'globals', 'hasattr', 'hash', 'help', 'hex', 'id', 'input', 'int', 'isinstance',
+        'issubclass', 'iter', 'len', 'list', 'locals', 'map', 'max', 'memoryview', 'min',
+        'next', 'object', 'oct', 'open', 'ord', 'pow', 'print', 'property', 'range',
+        'repr', 'reversed', 'round', 'set', 'setattr', 'slice', 'sorted', 'staticmethod',
+        'str', 'sum', 'super', 'tuple', 'type', 'vars', 'zip'
+    ];
+
     let editor = CodeMirror(editorElement, {
         lineNumbers: true,
-        mode: 'python'
+        mode: 'python',
+        extraKeys: {"Ctrl-Space": "autocomplete"},  // Changed from Tab to Ctrl-Space
+        hintOptions: {
+            hint: pythonHint
+        }
     });
 
+    function pythonHint(editor, options) {
+        return new Promise((resolve) => {
+            const cursor = editor.getCursor();
+            const source = editor.getValue();
+
+            fetch('/autocomplete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    source: source,
+                    line: cursor.line + 1,  // Jedi uses 1-based line numbers
+                    column: cursor.ch
+                })
+            })
+            .then(response => response.json())
+            .then(completions => {
+                resolve({
+                    list: completions.map(c => ({
+                        text: c.name,
+                        displayText: `${c.name} (${c.type})`,
+                        description: c.description
+                    })),
+                    from: editor.getCursor(),
+                    to: editor.getCursor()
+                });
+            });
+        });
+    }
+
+    // Add this to handle custom rendering of completions
+    CodeMirror.registerHelper("hint", "python", function(cm) {
+        return cm.getHelper(cm.getCursor(), "hint").hint(cm);
+    });
+
+    // Add this to customize the appearance of the autocomplete dropdown
+    CodeMirror.registerHelper("hint", "anyword", function(cm, options) {
+        var cursor = cm.getCursor(), token = cm.getTokenAt(cursor);
+        var to = CodeMirror.Pos(cursor.line, token.end);
+        if (token.string && /\w/.test(token.string[token.string.length - 1])) {
+            var term = token.string, from = CodeMirror.Pos(cursor.line, token.start);
+        } else {
+            var term = "", from = to;
+        }
+        var found = options.list.filter(function(item) {
+            return item.text.indexOf(term) == 0;
+        });
+        if (found.length) return {list: found, from: from, to: to};
+    });
     function fetchFiles() {
         fetch(`/files?path=${currentDirectory}`)
             .then(response => response.json())
