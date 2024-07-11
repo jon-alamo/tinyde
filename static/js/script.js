@@ -6,13 +6,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const renameButton = document.getElementById('rename');
     const deleteButton = document.getElementById('delete');
     const saveButton = document.getElementById('save');
-    const backButton = document.createElement('button');
-    backButton.textContent = "Back";
-    backButton.addEventListener('click', goBack);
-    fileBrowser.parentNode.insertBefore(backButton, fileBrowser);
+
     const parentDropArea = document.createElement('div');
     parentDropArea.textContent = "Move to Parent Directory";
     parentDropArea.classList.add('parent-drop-area');
+    parentDropArea.addEventListener('click', goBack);
     parentDropArea.addEventListener('dragover', dragOver);
     parentDropArea.addEventListener('drop', dropToParent);
     fileBrowser.appendChild(parentDropArea);
