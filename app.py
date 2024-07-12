@@ -48,10 +48,7 @@ def rename():
 @app.route('/file/move', methods=['PUT'])
 def move():
     data = request.json
-    app_root = os.path.abspath('chatgpt4o_solution')
-    old_path = os.path.join(app_root, data['old_path'])
-    new_path = os.path.join(app_root, data['new_path'])
-    fo.move_item(old_path, new_path)
+    fo.move_item(data['old_path'], data['new_path'])
     return jsonify({"success": True})
 
 @app.route('/file/content', methods=['GET'])
@@ -89,16 +86,12 @@ def autocomplete():
     source = data['source']
     line = data['line']
     column = data['column']
-
-    script = jedi.Script(source)
-    completions = script.complete(line, column)
-
-    return jsonify([{
-        'name': c.name,
-        'type': c.type,
-        'description': c.description,
-    } for c in completions])
+    file_path = data['file']
+    completions = fo.autocomplete(
+        source=source, line=line, column=column, file_path=file_path
+    )
+    return jsonify(completions)
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5001)

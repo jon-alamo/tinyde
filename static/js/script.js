@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveButton = document.getElementById('save');
 
     const parentDropArea = document.createElement('div');
-    parentDropArea.textContent = "Move to Parent Directory";
+    parentDropArea.textContent = " .. ";
     parentDropArea.classList.add('parent-drop-area');
     parentDropArea.addEventListener('click', goBack);
     parentDropArea.addEventListener('dragover', dragOver);
@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fileBrowser.appendChild(parentDropArea);
     let currentDirectory = '.';
     let selectedFile = null;
+    let currentOpenFile = null;
 
     // Add this near the top of your script.js file
     const pythonBuiltins = [
@@ -32,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let editor = CodeMirror(editorElement, {
         lineNumbers: true,
         mode: 'python',
-        extraKeys: {"Ctrl-Space": "autocomplete"},  // Changed from Tab to Ctrl-Space
+        extraKeys: {"Tab": "autocomplete"},
         hintOptions: {
             hint: pythonHint
         }
@@ -51,7 +52,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({
                     source: source,
                     line: cursor.line + 1,  // Jedi uses 1-based line numbers
-                    column: cursor.ch
+                    column: cursor.ch,
+                    file: currentOpenFile
                 })
             })
             .then(response => response.json())
@@ -111,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (file.type === 'file') {
                     openFile(file.path);
                 } else if (file.type === 'directory') {
-                    changeDirectory(file.path);
+                    enterDirectory(file.path);
                 }
             });
             fileElement.addEventListener('dragstart', dragStart);
@@ -129,7 +131,9 @@ document.addEventListener('DOMContentLoaded', () => {
         selectedFile.classList.add('selected');
     }
 
-    function openFile(filePath) {
+    function openFile(fileName) {
+        filePath = `${currentDirectory}/${fileName}`
+        currentOpenFile = filePath
         fetch(`/file/content?path=${filePath}`)
             .then(response => response.json())
             .then(data => {
@@ -139,13 +143,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function changeDirectory(directoryPath) {
         currentDirectory = directoryPath;
+        console.log(`This is currentDirectory: ${currentDirectory}`);
         fetchFiles();
+    }
+
+    function enterDirectory(directoryName) {
+        changeDirectory(
+            `${currentDirectory}/${directoryName}`
+        );
     }
 
     function goBack() {
         if (currentDirectory !== '.') {
             const parentDir = currentDirectory.split('/').slice(0, -1).join('/');
-            currentDirectory = parentDir === '' ? '.' : parentDir;
+            changeDirectory(parentDir === '' ? '.' : parentDir);
             fetchFiles();
         }
     }

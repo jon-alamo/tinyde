@@ -1,5 +1,6 @@
 import os
 import shutil
+import jedi
 
 
 ROOT_PATH = 'hapy'
@@ -63,4 +64,16 @@ def get_file_structure(base_dir):
                 "type": "file",
                 "path": os.path.relpath(os.path.join(root, file), root_dir)
             })
+        break
     return file_structure
+
+
+def autocomplete(source, line, column, file_path=None):
+    kwargs = {'path': os.path.join(ROOT_PATH, file_path)} if file_path else {}
+    script = jedi.Script(source, **kwargs)
+    completions = script.complete(line, column)
+    return [{
+        'name': c.name,
+        'type': c.type,
+        'description': c.description,
+    } for c in completions]
