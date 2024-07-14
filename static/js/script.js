@@ -1,3 +1,4 @@
+
 document.addEventListener('DOMContentLoaded', () => {
     const fileBrowser = document.getElementById('file-browser');
     const editorElement = document.getElementById('editor');
@@ -17,6 +18,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentDirectory = '.';
     let selectedFile = null;
     let currentOpenFile = null;
+
+    const imageUrls = {
+        directory: '/static/images/folder.png',
+        python: '/static/images/python_document.png',
+        default: '/static/images/empty_document.png'
+    };
 
     // Add this near the top of your script.js file
     const pythonBuiltins = [
@@ -90,6 +97,29 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         if (found.length) return {list: found, from: from, to: to};
     });
+
+    function getFileIcon(element, file) {
+        let img = document.createElement('img');
+        img.style.width = '20px';
+        img.style.height = '20px';
+        img.style.marginRight = '8px';
+
+        const fileExtension = file.split('.').pop();
+        if (fileExtension === file) {
+            img.src = element.classList.contains('directory') ? imageUrls.directory : imageUrls.default;
+        } else {
+            switch (fileExtension) {
+                case 'py':
+                    img.src = imageUrls.python;
+                    break;
+                default:
+                    img.src = imageUrls.default;
+                    break;
+            }
+        }
+        return img;
+    }
+
     function fetchFiles() {
         fetch(`/files?path=${currentDirectory}`)
             .then(response => response.json())
@@ -103,7 +133,14 @@ document.addEventListener('DOMContentLoaded', () => {
         fileBrowser.appendChild(parentDropArea); // Re-add the parent drop area
         files.forEach(file => {
             const fileElement = document.createElement('div');
-            fileElement.textContent = file.path;
+            fileElement.classList.add(file.type);
+            
+            const fileIcon = getFileIcon(fileElement, file.path);
+            fileElement.appendChild(fileIcon);
+            
+            const fileText = document.createTextNode(file.path);
+            fileElement.appendChild(fileText);
+            
             fileElement.classList.add(file.type);
             fileElement.draggable = true;
             fileElement.addEventListener('click', () => {
