@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -20,6 +21,7 @@
             flex: 1;
             display: flex;
             flex-direction: column;
+            overflow: auto; /* Enable scrolling when content exceeds the editor area */
         }
         .CodeMirror {
             flex: 1;
@@ -54,3 +56,4 @@
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>
+

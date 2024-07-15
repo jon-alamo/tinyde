@@ -1,4 +1,5 @@
 
+
 # Hapy-Addon
 
 Hapy-Addon is a lightweight, web-based, Python-backed editor that includes a simple file browser. The Python backend, powered by Flask, serves a REST API for filesystem operations and provides an autocompletion feature. The web UI is a simple layout in HTML, styled with a CSS module.
@@ -31,9 +32,9 @@ Hapy-Addon is a lightweight, web-based, Python-backed editor that includes a sim
 
 ## Usage
 
-1. **Run the Flask Application**:
+1. **Run the Command Line Tool**:
    ```sh
-   python app.py
+   tinyde --port 5001
    ```
 
 2. **Access the Web Interface**:
@@ -55,10 +56,13 @@ Hapy-Addon is a lightweight, web-based, Python-backed editor that includes a sim
 │   │   └── subdir/
 │   │       └── mynewfile.py  # Example Python file
 │   └── script.py           # Example usage of `mynewfile`
-├── app.py                  # Main Flask application
+├── tinyde/
+│   ├── __init__.py         # Init file for the tinyde module
+│   ├── cli.py              # Command line interface entry file
+│   ├── webapp.py           # Main Flask application
+│   └── file_operations.py  # File operations utility
 ├── templates/
 │   └── index.html          # HTML template for the web interface
-└── file_operations.py      # File operations utility
 ```
 
 ## API Endpoints

@@ -228,9 +228,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function goBack() {
-        if (currentDirectory !== '.') {
+        if (currentDirectory !== '') {
             const parentDir = currentDirectory.split('/').slice(0, -1).join('/');
-            changeDirectory(parentDir === '' ? '.' : parentDir);
+            changeDirectory(parentDir === '' ? '' : parentDir);
             fetchFiles();
         }
     }
@@ -281,7 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function dropToParent(event) {
         event.preventDefault();
         const draggedFile = event.dataTransfer.getData('text/plain');
-        const parentDir = currentDirectory.split('/').slice(0, -1).join('/') || '.';
+        const parentDir = currentDirectory.split('/').slice(0, -1).join('/') || '';
         fetch('/file/move', {
             method: 'PUT',
             headers: {
