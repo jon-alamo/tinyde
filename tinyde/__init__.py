@@ -1,0 +1,2 @@
+
+# tinyde package initialization file
