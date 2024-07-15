@@ -8,9 +8,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const deleteButton = document.getElementById('delete');
     const saveButton = document.getElementById('save');
     const fileNameElement = document.getElementById('file-name');
+    const editorButtons = document.getElementById('editor-buttons');
+
+    // Initially disable editor
+    editorElement.style.pointerEvents = "none";
+    editorElement.style.opacity = "0.5";
+    editorButtons.style.pointerEvents = "none";
+    editorButtons.style.opacity = "0.5";
 
     const parentDropArea = document.createElement('div');
-    parentDropArea.textContent = " .. ";
+    const parentIcon = document.createElement('img');
+    parentIcon.src = '/static/images/folder.png';
+    parentIcon.style.verticalAlign = 'middle';
+    parentIcon.style.width = '16px';  // Reduced width
+    parentIcon.style.height = '16px'; // Reduced height
+    parentIcon.style.marginRight = '8px';
+
+    parentDropArea.appendChild(parentIcon);
+    parentDropArea.appendChild(document.createTextNode(" .. "));
     parentDropArea.classList.add('parent-drop-area');
     parentDropArea.addEventListener('click', goBack);
     parentDropArea.addEventListener('dragover', dragOver);
@@ -193,6 +208,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 editor.setValue(data.content);
                 isFileModified = false;  // Reset the modified flag once the file is opened
                 updateSaveButton();      // Update the save button accordingly
+                // Enable editor when a file is opened
+                editorElement.style.pointerEvents = "auto";
+                editorElement.style.opacity = "1";
+                editorButtons.style.pointerEvents = "auto";
+                editorButtons.style.opacity = "1";
             });
     }
 
@@ -265,7 +285,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fetch('/file/move', {
             method: 'PUT',
             headers: {
-                'Content-Type': 'application/json'
+                    'Content-Type': 'application/json'
             },
             body: JSON.stringify({
                 old_path: `${currentDirectory}/${draggedFile}`,

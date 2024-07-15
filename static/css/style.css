@@ -1,5 +1,4 @@
 
-
 body {
     display: flex;
     flex-direction: column;
@@ -185,13 +184,18 @@ button#save {
 }
 
 .parent-drop-area {
-    padding: 10px;
+    padding: 5px; /* Reduced padding */
     margin-bottom: 10px;
     background-color: #383838;
     text-align: center;
     border: 1px dashed #666;
     cursor: pointer;
     color: #FFFFFF;
+}
+
+.parent-drop-area:hover {
+    background-color: #505050;
+    border: 1px solid #af946f;
 }
 
 .selected {
