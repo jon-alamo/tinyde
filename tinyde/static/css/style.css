@@ -1,5 +1,4 @@
 
-
 body {
     display: flex;
     flex-direction: column;
@@ -62,14 +61,19 @@ body {
     overflow: hidden;  /* Prevent scrollbars from appearing */
 }
 
-#editor .CodeMirror {
+#editor {
     flex: 1;
     height: 100% !important;
     min-height: 0;
     border: 1px solid #444;
     background-color: #2c2c2c;
     color: #FFFFFF;
-    overflow: auto; /* Enable scrolling when content exceeds the editor area */
+}
+
+#editor .CodeMirror {
+    flex: 1;
+    height: 100% !important;
+    min-height: 0;
 }
 
 #editor-buttons {
@@ -122,6 +126,7 @@ button#save {
     color: #FFFFFF;
     border-radius: 4px;
     border: 1px solid #444;
+    overflow: auto; /* Enable scrolling when content exceeds the editor area */
 }
 
 .cm-s-default, .cm-s-default .CodeMirror-gutters, .cm-s-default.CodeMirror {
@@ -213,4 +218,3 @@ button#save {
     border: 1px solid #af946f; /* Highlighting the border instead of coloring the entire area */
     box-sizing: border-box;    /* Ensuring the border does not affect element dimensions */
 }
-
