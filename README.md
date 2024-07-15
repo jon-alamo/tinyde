@@ -1,5 +1,4 @@
 
-
 # Tinyde
 
 Tinyde is a lightweight, web-based, Python-backed editor that includes a simple file browser. The Python backend, powered by Flask, serves a REST API for filesystem operations and provides an autocompletion feature. The web UI is a simple layout in HTML, styled with a CSS module.
@@ -10,6 +9,7 @@ Tinyde is a lightweight, web-based, Python-backed editor that includes a simple 
 - **File Operations**: Create, rename, delete, and move files and directories.
 - **Code Editor**: Edit your Python files with syntax highlighting and auto-completion.
 - **Autocompletion**: Access Python builtins and custom modules with the help of Jedi.
+- **Customizable Title**: Define the header title from the command line.
 
 ## Installation
 
@@ -22,7 +22,7 @@ Tinyde is a lightweight, web-based, Python-backed editor that includes a simple 
 
 1. **Run the Command Line Tool**:
    ```sh
-   tinyde --port 5001
+   tinyde --port 5001 --title "My Custom Title"
    ```
 
 2. **Access the Web Interface**:

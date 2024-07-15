@@ -1,10 +1,11 @@
+
 from flask import Flask, render_template, jsonify, request, send_from_directory
 from flask_cors import CORS
 from tinyde import file_operations as fo
 import os
 
 
-def create_app():
+def create_app(title="tinyde"):
     app = Flask(__name__)
     CORS(app)
     root_path = '.'
@@ -12,7 +13,7 @@ def create_app():
 
     @app.route('/')
     def index():
-        return render_template('index.html')
+        return render_template('index.html', title=title)
 
 
     @app.route('/files', methods=['GET'])
@@ -95,6 +96,7 @@ def create_app():
 
     return app
 
-def run_app(port):
-    app = create_app()
+def run_app(port, title):
+    app = create_app(title)
     app.run(debug=True, port=port)
+
