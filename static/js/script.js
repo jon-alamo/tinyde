@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const renameButton = document.getElementById('rename');
     const deleteButton = document.getElementById('delete');
     const saveButton = document.getElementById('save');
+    const fileNameElement = document.getElementById('file-name');
 
     const parentDropArea = document.createElement('div');
     parentDropArea.textContent = " .. ";
@@ -18,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentDirectory = '.';
     let selectedFile = null;
     let currentOpenFile = null;
+    let isFileModified = false;
 
     const imageUrls = {
         directory: '/static/images/folder.png',
@@ -25,7 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
         default: '/static/images/empty_document.png'
     };
 
-    // Add this near the top of your script.js file
     const pythonBuiltins = [
         'abs', 'all', 'any', 'ascii', 'bin', 'bool', 'bytearray', 'bytes', 'callable',
         'chr', 'classmethod', 'compile', 'complex', 'delattr', 'dict', 'dir', 'divmod',
@@ -40,11 +41,38 @@ document.addEventListener('DOMContentLoaded', () => {
     let editor = CodeMirror(editorElement, {
         lineNumbers: true,
         mode: 'python',
-        extraKeys: {"Tab": "autocomplete"},
+        extraKeys: {
+            "Tab": (cm) => {
+                const cursor = cm.getCursor();
+                const token = cm.getTokenAt(cursor);
+                
+                // Check if the cursor is right after a period
+                if (token.string === '.') {
+                    cm.showHint({completeSingle: false});
+                } else {
+                    cm.replaceSelection("\t");
+                }
+            }
+        },
         hintOptions: {
             hint: pythonHint
         }
     });
+
+    editor.on('change', () => {
+        isFileModified = true;
+        updateSaveButton();
+    });
+
+    function updateSaveButton() {
+        if (isFileModified) {
+            saveButton.disabled = false;
+            saveButton.style.backgroundColor = '#FF6961'; // active state color
+        } else {
+            saveButton.disabled = true;
+            saveButton.style.backgroundColor = '#999999'; // grayed out state color
+        }
+    }
 
     function pythonHint(editor, options) {
         return new Promise((resolve) => {
@@ -78,28 +106,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Add this to handle custom rendering of completions
     CodeMirror.registerHelper("hint", "python", function(cm) {
         return cm.getHelper(cm.getCursor(), "hint").hint(cm);
     });
 
-    // Add this to customize the appearance of the autocomplete dropdown
-    CodeMirror.registerHelper("hint", "anyword", function(cm, options) {
-        var cursor = cm.getCursor(), token = cm.getTokenAt(cursor);
-        var to = CodeMirror.Pos(cursor.line, token.end);
-        if (token.string && /\w/.test(token.string[token.string.length - 1])) {
-            var term = token.string, from = CodeMirror.Pos(cursor.line, token.start);
-        } else {
-            var term = "", from = to;
-        }
-        var found = options.list.filter(function(item) {
-            return item.text.indexOf(term) == 0;
-        });
-        if (found.length) return {list: found, from: from, to: to};
-    });
-
     function getFileIcon(element, file) {
         let img = document.createElement('img');
+        img.style.verticalAlign = 'middle';
         img.style.width = '20px';
         img.style.height = '20px';
         img.style.marginRight = '8px';
@@ -130,17 +143,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function displayFiles(files) {
         fileBrowser.innerHTML = '';
-        fileBrowser.appendChild(parentDropArea); // Re-add the parent drop area
+        fileBrowser.appendChild(parentDropArea);
         files.forEach(file => {
             const fileElement = document.createElement('div');
             fileElement.classList.add(file.type);
-            
+
             const fileIcon = getFileIcon(fileElement, file.path);
             fileElement.appendChild(fileIcon);
-            
+
             const fileText = document.createTextNode(file.path);
             fileElement.appendChild(fileText);
-            
+
             fileElement.classList.add(file.type);
             fileElement.draggable = true;
             fileElement.addEventListener('click', () => {
@@ -148,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             fileElement.addEventListener('dblclick', () => {
                 if (file.type === 'file') {
-                    openFile(file.path);
+                    saveCurrentFile(() => openFile(file.path));
                 } else if (file.type === 'directory') {
                     enterDirectory(file.path);
                 }
@@ -169,18 +182,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function openFile(fileName) {
-        filePath = `${currentDirectory}/${fileName}`
-        currentOpenFile = filePath
+        const filePath = `${currentDirectory}/${fileName}`
+        currentOpenFile = filePath;
+        isFileModified = false;
+        updateSaveButton();
+        fileNameElement.textContent = filePath;
         fetch(`/file/content?path=${filePath}`)
             .then(response => response.json())
             .then(data => {
                 editor.setValue(data.content);
+                isFileModified = false;  // Reset the modified flag once the file is opened
+                updateSaveButton();      // Update the save button accordingly
             });
     }
 
     function changeDirectory(directoryPath) {
         currentDirectory = directoryPath;
-        console.log(`This is currentDirectory: ${currentDirectory}`);
         fetchFiles();
     }
 
@@ -196,6 +213,23 @@ document.addEventListener('DOMContentLoaded', () => {
             changeDirectory(parentDir === '' ? '.' : parentDir);
             fetchFiles();
         }
+    }
+
+    function saveCurrentFile(callback) {
+        fetch('/file/content', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                path: currentOpenFile,
+                content: editor.getValue()
+            })
+        }).then(() => {
+            isFileModified = false;
+            updateSaveButton();
+            callback();
+        });
     }
 
     function dragStart(event) {
@@ -315,17 +349,9 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('Select a file to save.');
             return;
         }
-        fetch('/file/content', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                path: `${currentDirectory}/${selectedFile.textContent}`,
-                content: editor.getValue()
-            })
-        });
+        saveCurrentFile(() => {});
     });
 
     fetchFiles();
+    updateSaveButton(); // initial disable of save button
 });

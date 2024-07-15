@@ -73,7 +73,7 @@ body {
 
 #editor-buttons {
     display: flex;
-    justify-content: flex-end;
+    align-items: center; /* Center items vertically */
     margin-bottom: 10px;
     gap: 10px;
 }
@@ -89,6 +89,7 @@ button {
     border-radius: 4px;
     transition: background-color 0.3s;
     flex-shrink: 0;
+    height: 25px; /* Reduced height to half */
 }
 
 button:hover {
@@ -97,9 +98,11 @@ button:hover {
 
 #file-browser-buttons button {
     background-color: #FFB347;
+    flex: 1;
 }
 
 button#save {
+    height: 50%; /* Make save button the same height as its container */
     background-color: #FF6961;
 }
 
@@ -192,12 +195,13 @@ button#save {
 }
 
 .selected {
-    background-color: #77DD77;
+    background-color: rgba(255, 179, 71, 0.27);
     color: white;
 }
 
 .file:hover,
 .directory:hover {
-    background-color: #FFB347;
-    color: white;
+    border: 1px solid #af946f; /* Highlighting the border instead of coloring the entire area */
+    box-sizing: border-box;    /* Ensuring the border does not affect element dimensions */
 }
+
